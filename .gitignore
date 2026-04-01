@@ -1,0 +1,114 @@
+# =========================
+# GENERAL
+# =========================
+
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+
+# =========================
+# PYTHON / BACKEND
+# =========================
+
+**pycache**/
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+*.db
+
+# Entornos virtuales
+
+venv/
+env/
+ENV/
+.venv/
+
+# Archivos de entorno
+
+.env
+.env.*
+*.env
+
+# =========================
+# DJANGO (si lo usas)
+# =========================
+
+db.sqlite3
+media/
+staticfiles/
+
+# =========================
+# FRONTEND (VITE / REACT)
+# =========================
+
+node_modules/
+dist/
+build/
+
+# Archivos de entorno frontend
+
+frontend/.env
+frontend/.env.*
+
+# =========================
+# AGENTE DBAUDIT
+# =========================
+
+# Configuración local (NO subir)
+
+config/
+*.env
+backend/.env
+
+# Base de datos local del agente
+
+data/
+*.db
+
+# Logs del agente
+
+logs/
+*.log
+
+# =========================
+# TESTING / COVERAGE
+# =========================
+
+.coverage
+htmlcov/
+.pytest_cache/
+
+# =========================
+# IDEs
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# DOCKER (si luego usas)
+# =========================
+
+*.pid
+*.seed
+
+# =========================
+# CLAVES Y SECRETOS
+# =========================
+
+*.pem
+*.key
+*.crt
+*.p12
+
+# ========================
+# OTROS
+# =========================
+
+*.zip
+*.tar
+*.gz
