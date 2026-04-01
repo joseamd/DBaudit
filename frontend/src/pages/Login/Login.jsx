@@ -8,6 +8,8 @@ export default function Login() {
   const [user, setUser] = useState("");
   const [pass, setPass] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState("");
+  const [errorType, setErrorType] = useState(""); // tipo de error
 
   useEffect(() => {
     setLoaded(true);
@@ -15,12 +17,26 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    
+    // Validación de campos vacíos
+    if (!user.trim() || !pass.trim()) {
+      setError("Por favor completa todos los campos");
+      setErrorType("warning");
+      return;
+    }
+
     try {
       const data = await login(user, pass);
       localStorage.setItem("auth_token", data.access);
+
+      if (!data.access) {
+        throw new Error("Token inválido");
+      }
+
       window.location.href = "/";
     } catch (e) {
-      alert("Credenciales incorrectas");
+      setError("Usuario y/o Contraseña incorrecto (s)");
+      setErrorType("error");
     }
   };
 
@@ -43,9 +59,31 @@ export default function Login() {
         </div>
         <div className="login-form">
           <p>Inicia sesión con tu cuenta</p>
+
           <form onSubmit={handleLogin}>
-            <input type="text" placeholder="Usuario" value={user} onChange={e => setUser(e.target.value)} />
-            <input type="password" placeholder="Contraseña" value={pass} onChange={e => setPass(e.target.value)} />
+            <input
+              type="text"
+              placeholder="Usuario"
+              value={user}
+              onChange={(e) => {
+                setUser(e.target.value);
+                setError(""); // limpia error
+              }}
+            />
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={pass}
+              onChange={(e) => {
+                setPass(e.target.value);
+                setError(""); // limpia error
+              }}
+            />
+            {error && (
+              <p className={`error ${errorType}`}>
+                {error}
+              </p>
+            )}
             <button type="submit">Ingresar</button>
           </form>
         </div>

@@ -7,6 +7,13 @@ export const login = async (username, password) => {
 
   const data = await res.json();
 
+  // CLAVE: validar respuesta
+  if (!res.ok) {
+    throw new Error(data.detail || "Error de autenticación");
+  }
+
+  // SOLO guardar si es válido
   localStorage.setItem("auth_token", data.access);
+
   return data;
 };
