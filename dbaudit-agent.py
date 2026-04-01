@@ -74,17 +74,21 @@ import requests  # noqa: E402
 
 is_windows = platform.system() == "Windows"
 
+# Slug del agente según el .env cargado → aísla cola y log por agente
+_agent_env_name = os.environ.get("AGENT_ENV", "agent.env")
+_agent_slug     = Path(_agent_env_name).stem  # "agent_ases.env" → "agent_ases"
+
 # Rutas según el SO
 if is_windows:
     CONFIG_DIR = Path.home() / "AppData" / "Local" / "DBaudit"
-    QUEUE_DB = CONFIG_DIR / "queue.db"
-    LOG_FILE = CONFIG_DIR / "logs" / "agent.log"
+    QUEUE_DB   = CONFIG_DIR / f"queue_{_agent_slug}.db"
+    LOG_FILE   = CONFIG_DIR / "logs" / f"{_agent_slug}.log"
 else:
     CONFIG_DIR = Path("/etc/dbaudit")
-    QUEUE_DB = Path("/var/lib/dbaudit/queue.db")
-    LOG_FILE = Path("/var/log/dbaudit-agent.log")
+    QUEUE_DB   = Path(f"/var/lib/dbaudit/queue_{_agent_slug}.db")
+    LOG_FILE   = Path(f"/var/log/dbaudit-{_agent_slug}.log")
 
-CONFIG_FILE = CONFIG_DIR / os.environ.get("AGENT_ENV", "agent.env")
+CONFIG_FILE  = CONFIG_DIR / _agent_env_name
 SYSTEMD_UNIT = Path("/etc/systemd/system/dbaudit-agent.service")
 
 DEFAULT_CONFIG = {
