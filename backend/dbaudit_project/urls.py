@@ -21,6 +21,7 @@ from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken.views import obtain_auth_token
 
+
 from audit.views import (
     AgentNodeViewSet,
     DatabaseConnectionViewSet,
@@ -62,15 +63,7 @@ def download_agent(request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     # API principal
-    path("api/", include(router.urls)),
-
-    # INGEST (agentes)
-    path("api/ingest/events/", IngestEventsView.as_view()),
-    path("api/ingest/heartbeat/", IngestHeartbeatView.as_view()),
-    path("api/ingest/config/", IngestConfigView.as_view()),
-
-    # Auth
-    path("api/auth/token/", obtain_auth_token),
+    path("api/", include('audit.urls')),    
 
     # Descarga agente
     path("download/dbaudit-agent.py", download_agent),

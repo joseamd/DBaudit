@@ -13,6 +13,11 @@ from .serializers import (
     AlertRuleSerializer,
     AlertSerializer
 )
+from .ingest import (
+    IngestEventsView,
+    IngestHeartbeatView,
+    IngestConfigView,
+)
 
 
 class AgentNodeViewSet(viewsets.ModelViewSet):

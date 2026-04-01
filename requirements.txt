@@ -7,11 +7,11 @@
 # Framework principal
 # ========================
 Django==5.0.10
-djangorestframework==3.16
-djangorestframework-simplejwt==5.3.1   # JWT tokens (opcional)
-django-cors-headers==4.7.0              # CORS para el frontend React
-django-filter==25.1                     # Filtros en el API
-Markdown==3.8                          # Renderizado (DRF / docs)
+djangorestframework==3.16.0
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.7.0
+django-filter==25.1
+Markdown==3.8
 django-environ==0.13.0
 
 # ========================
@@ -24,57 +24,52 @@ django-crum==0.7.9
 # Tareas asíncronas
 # ========================
 celery==5.4.0
-django-celery-beat==2.6.0              # Scheduler de Celery en BD
+django-celery-beat==2.6.0
 
 # ========================
 # Cache / Broker
 # ========================
-redis==5.0.7                            # broker de Celery y caché
+redis==5.0.7
 django-redis==5.4.0
 
 # ========================
-# Base de datos (core)
+# Base de datos
 # ========================
-psycopg2-binary==2.9.10                  # PostgreSQL (BD interna del proyecto)
-
-# --- Database connectors (modo directo, sin agente) ---
-# Descomenta solo los motores que uses en modo DIRECTO
-# psycopg2-binary ya está incluido arriba para PostgreSQL
-# mysql-connector-python==8.4.0         # MySQL modo directo
+psycopg2-binary==2.9.10
 
 # ========================
 # Seguridad
 # ========================
-cryptography==42.0.8                    # cifrado de contraseñas de BD
-django-encrypted-model-fields==0.6.5   # campos cifrados en modelos
+cryptography==42.0.8    # cifrado de contraseñas de BD
+django-encrypted-model-fields==0.6.5    # campos cifrados en modelos
 
 # ========================
 # Email / Notificaciones
 # ========================
-django-anymail==10.3                    # envío de alertas por email (SendGrid, SES, etc.)
+django-anymail==10.3    # envío de alertas por email (SendGrid, SES, etc.)
 
 # ========================
-# Exportación de reportes
+# Reportes
 # ========================
-openpyxl==3.1.5                        # exportar a Excel
-reportlab==4.2.2                        # exportar a PDF
+openpyxl==3.1.5          # exportar a Excel
+reportlab==4.2.2         # exportar a PDF
 
 # ========================
-# Servidor / Producción
+# Producción
 # ========================
-gunicorn==22.0.0                        # servidor WSGI para producción
-whitenoise==6.7.0                       # sirve archivos estáticos
+gunicorn==22.0.0        # servidor WSGI para producción
+whitenoise==6.7.0       # sirve archivos estáticos
 
 # ========================
-# Utilidades generales
+# Utilidades
 # ========================
-python-dotenv==1.0.1                    # carga .env automáticamente
+python-dotenv==1.0.1         # carga .env automáticamente
 python-dateutil==2.9.0.post0
 six==1.17.0
-Pillow==10.4.0   # Imágenes (si aplica)
+Pillow==10.4.0
 
 # ========================
-# Desarrollo & testing
+# Desarrollo
 # ========================
 django-debug-toolbar==4.4.2
 pytest-django==4.8.0

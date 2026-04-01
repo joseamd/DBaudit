@@ -21,9 +21,13 @@ class DatabaseConnectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = DatabaseConnection
         fields = "__all__"
+        extra_kwargs = {
+            "password": {"write_only": True}
+        }
 
 
 class AuditEventSerializer(serializers.ModelSerializer):
+    database_name = serializers.CharField(source="database.name", read_only=True)
     class Meta:
         model = AuditEvent
         fields = "__all__"

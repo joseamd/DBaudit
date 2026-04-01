@@ -18,6 +18,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
+from .permissions import AgentTokenPermission
 
 from .models import AgentNode, DatabaseConnection, AuditEvent
 from .alert_engine import AlertEngine
@@ -33,20 +34,35 @@ class AgentTokenAuth:
     @staticmethod
     def authenticate(request):
         auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+        logger.warning(f"[AUTH] Header recibido: '{auth_header[:80] if auth_header else 'VACIO'}'...")
 
         if not auth_header.startswith("Token "):
+            logger.warning(f"[AUTH] Header inválido (no empieza con 'Token ')")
             return None, Response(
                 {"error": "Missing or invalid Authorization header. Use: Token <agent_token>"},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
         token = auth_header.split(" ", 1)[1].strip()
+        logger.warning(f"[AUTH] Token extraído: {token[:20]}...{token[-10:] if len(token) > 30 else ''}")
+        logger.warning(f"[AUTH] Longitud del token: {len(token)}")
 
         try:
             agent = AgentNode.objects.select_related("database").get(token=token)
+            logger.info(f"[AUTH] ✅ Agente encontrado: {agent.name} (status={agent.status})")
         except AgentNode.DoesNotExist:
+            logger.warning(f"[AUTH] ❌ Token no encontrado en BD")
+            logger.warning(f"[AUTH] Buscando agentes con primeros 10 caracteres: {token[:10]}")
+            # Check if token exists at all
+            count = AgentNode.objects.filter(token__icontains=token[:10]).count()
+            logger.warning(f"[AUTH] Encontrados {count} agentes con ese prefijo")
+            # Listar todos los tokens para debugging
+            all_agents = AgentNode.objects.all()
+            logger.warning(f"[AUTH] Total agentes en BD: {all_agents.count()}")
+            for a in all_agents[:5]:  # Primeros 5
+                logger.warning(f"[AUTH]   - {a.name}: {a.token[:20]}...")
             return None, Response(
-                {"error": "Invalid agent token"},
+                {"detail": "Invalid token."},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
@@ -64,7 +80,8 @@ class AgentTokenAuth:
 # ──────────────────────────────────────────────
 
 class IngestEventsView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = []
+    permission_classes = [AgentTokenPermission]
 
     def post(self, request):
         agent, err = AgentTokenAuth.authenticate(request)
@@ -102,9 +119,14 @@ class IngestEventsView(APIView):
             db_user = ev.get("db_user", "unknown")
 
             try:
-                occurred_at = datetime.fromisoformat(
-                    occurred_str.replace("Z", "+00:00")
-                ) if occurred_str else dj_tz.now()
+                occurred_at = (
+                    datetime.fromisoformat(occurred_str.replace("Z", "+00:00"))
+                    if occurred_str else dj_tz.now()
+                )
+
+                if dj_tz.is_naive(occurred_at):
+                    occurred_at = dj_tz.make_aware(occurred_at)
+
             except Exception:
                 occurred_at = dj_tz.now()
 
@@ -219,7 +241,8 @@ class IngestEventsView(APIView):
 # ──────────────────────────────────────────────
 
 class IngestHeartbeatView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = []
+    permission_classes = [AgentTokenPermission]
 
     def post(self, request):
         agent, err = AgentTokenAuth.authenticate(request)
@@ -255,7 +278,8 @@ class IngestHeartbeatView(APIView):
 # ──────────────────────────────────────────────
 
 class IngestConfigView(APIView):
-    permission_classes = [AllowAny]
+    authentication_classes = []
+    permission_classes = [AgentTokenPermission]
 
     def get(self, request):
         agent, err = AgentTokenAuth.authenticate(request)

@@ -1,0 +1,103 @@
+:root {
+  --login-left-bg: #4812a7; /* morado */
+  --login-right-bg: #f1f5f9;
+  --heading: 'DM Sans', sans-serif;
+  --text-h: #0f172a;
+  --text-muted: #94a3b8;
+  --accent: #6366f1;
+  --accent-border: #7c3aed;
+}
+
+/* Contenedor principal */
+.login-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--heading);
+}
+
+/* Columna izquierda */
+.login-left {
+  flex: 1 1 80%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--login-left-bg);
+  background-image: url('/src/assets/dbaudit-bg.png');      
+  background-repeat: repeat;
+  padding: 20px;
+  color: #fff;
+  position: relative;
+}
+
+.icon-wrapper {
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+.login-icon {
+  font-size: 150px;
+  color: #fff;
+}
+
+.app-name {
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Derechos de autor al fondo */
+.login-left-footer {
+  position: absolute;
+  bottom: 20px;
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+}
+
+/* Columna derecha */
+.login-right {
+  flex: 1 1 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--text-h);
+}
+
+.login-right-content {
+  text-align: center;
+}
+
+/* Formulario */
+.login-form {
+  width: 90%;
+  max-width: 400px;
+  padding: 36px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  text-align: center;
+  background: #fff;
+}
+
+.login-right h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+.login-form h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; color: var(--text-h); }
+.login-form p { font-size: 16px; color: var(--text-h); margin-bottom: 24px; }
+.login-form input {
+  width: 100%; padding: 14px; margin-bottom: 16px; border-radius: 12px;
+  border: 1px solid rgba(107,99,117,0.25); font-size: 14px; outline: none;
+}
+.login-form input:focus { border: 1px solid var(--accent); }
+.login-form button {
+  width: 100%; padding: 14px; border-radius: 12px;
+  background: var(--accent); color: #fff; font-weight: 600; font-size: 15px; cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+}
+.login-form button:hover { background: var(--accent-border); transform: translateY(-2px); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .login-container { flex-direction: column; }
+  .login-left { display: none; }
+  .login-right { flex: 1 1 100%; }
+}
