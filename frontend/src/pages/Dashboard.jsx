@@ -100,12 +100,7 @@ export default function Dashboard({ onNavigate }) {
         subtitle={useMock
           ? "⚠ Backend no disponible — mostrando datos de demostración"
           : `Últimas 24h · ${agents.filter(a => a.status === "active").length} BDs activas · ${healthyAg}/${agents.length} agentes online`
-        }
-        action={
-          <Btn variant="secondary">
-            <Download size={14} /> Exportar
-          </Btn>
-        }
+        }        
       />
 
       {/* KPIs */}
