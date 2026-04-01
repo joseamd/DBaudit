@@ -126,15 +126,24 @@ export const NavItem = ({ icon: Icon, label, active, onClick, badge, collapsed }
       color: active ? "#818cf8" : "#64748b",
       fontSize: 13, 
       fontWeight: active ? 600 : 400,
-      transition: "all 0.15s", textAlign: "left",
+      transition: "all 0.15s", 
+      textAlign: "left",
       fontFamily: "'DM Sans', sans-serif",
+      justifyContent: collapsed ? "center" : "flex-start", // centrar iconos
     }}
     onMouseEnter={e => { if (!active) e.currentTarget.style.background = "rgba(255,255,255,0.04)"; }}
     onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
   >
+    {/* Icono siempre visible */}
     <Icon size={16} />
-    <span style={{ flex: 1 }}>{label}</span>
-    {badge != null && badge > 0 && (
+
+    {/* Texto solo si no está colapsado */}
+    {!collapsed && (
+      <span style={{ flex: 1 }}>{label}</span>
+    )}
+
+    {/* Badge */}
+    {badge != null && badge > 0 && !collapsed && (
       <span style={{
         background: "#ef4444", color: "#fff", borderRadius: 20,
         fontSize: 10, fontWeight: 700, padding: "1px 6px", minWidth: 18, textAlign: "center",
