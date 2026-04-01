@@ -1,12 +1,12 @@
 # ============================================================
 #  DBaudit — Backend Requirements
-#  Servidor central de auditoría (Django + Celery)
 # ============================================================
 
 # ========================
 # Framework principal
 # ========================
 Django==5.0.10
+asgiref==3.11.1
 djangorestframework==3.16.0
 djangorestframework-simplejwt==5.3.1
 django-cors-headers==4.7.0
@@ -25,6 +25,13 @@ django-crum==0.7.9
 # ========================
 celery==5.4.0
 django-celery-beat==2.6.0
+amqp==5.3.1
+billiard==4.2.4
+kombu==5.6.2
+vine==5.1.0
+django-timezone-field==7.2.1
+cron_descriptor==2.0.8
+python-crontab==3.3.0
 
 # ========================
 # Cache / Broker
@@ -53,6 +60,12 @@ django-anymail==10.3    # envío de alertas por email (SendGrid, SES, etc.)
 # ========================
 openpyxl==3.1.5          # exportar a Excel
 reportlab==4.2.2         # exportar a PDF
+et_xmlfile==2.0.0       # dependencia de openpyxl para manejar XML en Excel
+
+# ========================
+# HTTP / APIs externas
+# ========================
+requests==2.33.0
 
 # ========================
 # Producción
@@ -72,5 +85,7 @@ Pillow==10.4.0
 # Desarrollo
 # ========================
 django-debug-toolbar==4.4.2
+pytest==9.0.2
 pytest-django==4.8.0
 factory-boy==3.3.1
+Faker==40.11.1
