@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   Activity, User, Database, Lock, Shield, Zap, FileText,
-  AlertTriangle, Download, Calendar, RefreshCw, CheckCircle,
+  AlertTriangle, Download, Calendar, RefreshCw, CheckCircle, WifiOff
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -10,8 +10,8 @@ import {
 
 import { EventService, DatabaseService } from "../services/api";
 import { SEVERITY_COLOR, OP_COLOR, unwrap, fmtDate } from "../constants/constants";
-import { fakeEvents, fakeDbs, fakeChartData } from "../mocks/mockData";
-import { Card, StatCard, SectionHeader, Btn, Select, Spinner } from "../components/ui";
+// import { fakeEvents, fakeDbs, fakeChartData } from "../mocks/mockData";
+import { Card, StatCard, SectionHeader, Btn, Select, Spinner, EmptyState } from "../components/ui";
 
 // ─── Report type definitions ──────────────────────────────────────────────────
 
@@ -195,7 +195,7 @@ function EventTable({ events, title }) {
             </tr>
           </thead>
           <tbody>
-            {events.slice(0, 50).map((e, i) => (
+            {(events || []).slice(0, 50).map((e, i) => (
               <tr key={e.id} style={{ borderBottom: "1px solid #f8fafc", background: i % 2 === 0 ? "#fff" : "#fafbfc" }}>
                 <td style={{ padding: "8px 14px", fontFamily: "'DM Mono', monospace", fontSize: 10, color: "#64748b", whiteSpace: "nowrap" }}>{fmtDate(e.occurred_at)}</td>
                 <td style={{ padding: "8px 14px", fontWeight: 600, color: "#0f172a", fontFamily: "'DM Mono', monospace", fontSize: 11 }}>{e.database_name || e.database}</td>
@@ -210,7 +210,7 @@ function EventTable({ events, title }) {
                 </td>
               </tr>
             ))}
-            {events.length === 0 && (
+            {(events?.length || 0) === 0 && (
               <tr><td colSpan={7} style={{ padding: 24, textAlign: "center", color: "#94a3b8", fontSize: 13 }}>Sin eventos en el período seleccionado</td></tr>
             )}
           </tbody>
@@ -233,31 +233,53 @@ export default function ReportsView() {
   const [loading, setLoading]         = useState(true);
   const [activeReport, setActiveReport] = useState(null);
   const [dbFilter, setDbFilter]       = useState("");
+  const [error, setError]             = useState(null);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      try {
-        const [evData, dbData] = await Promise.all([
-          EventService.getEvents({ limit: 1000 }),
-          DatabaseService.getDatabases(),
-        ]);
-        setEvents(unwrap(evData, fakeEvents));
-        setDbs(unwrap(dbData, fakeDbs));
-      } catch {
-        setEvents(fakeEvents);
-        setDbs(fakeDbs);
-      } finally {
-        setLoading(false);
+      setError(null);
+
+      const [evRes, dbRes] = await Promise.allSettled([
+        EventService.getEvents({ limit: 1000 }),
+        DatabaseService.getDatabases(),
+      ]);
+
+      // Events
+      if (evRes.status === "fulfilled") {
+        const data = evRes.value;
+        setEvents(Array.isArray(data) ? data : data?.results || []);
+      } else {
+        console.error("Error events:", evRes.reason);
+        setEvents([]);
       }
+
+      // DBs
+      if (dbRes.status === "fulfilled") {
+        const data = dbRes.value;
+        setDbs(Array.isArray(data) ? data : data?.results || []);
+      } else {
+        console.error("Error dbs:", dbRes.reason);
+        setDbs([]);
+      }
+
+      // error solo si TODO falla
+      if (evRes.status === "rejected" && dbRes.status === "rejected") {
+        setError("No se pudo conectar con el servidor");
+      }
+
+      setLoading(false);
     };
+
     load();
   }, []);
 
   // Filter events
-  const filteredEvents = dbFilter
-    ? events.filter(e => e.database === dbFilter || e.database_name === dbFilter)
-    : events;
+  const safeEvents = events || [];
+
+  const filteredEvents = safeEvents.filter(e =>
+    !dbFilter || e.database === dbFilter || e.database_name === dbFilter
+  );
 
   // Report-specific event subsets
   const reportEvents = {
@@ -311,19 +333,35 @@ export default function ReportsView() {
             {dbs.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
           </Select>
           <span style={{ fontSize: 12, color: "#94a3b8" }}>
-            {filteredEvents.length.toLocaleString()} eventos cargados
+            {(filteredEvents?.length || 0).toLocaleString()} eventos cargados
           </span>
         </div>
       </Card>
 
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}><Spinner size={32} /></div>
+        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+          <Spinner size={32} />
+        </div>
+      ) : error ? (   
+        <EmptyState
+          icon={WifiOff}
+          title="Error de conexión"
+          sub="No se pudo obtener la información del servidor"
+        />
+      ) : events.length === 0 ? (  
+        <EmptyState
+          icon={FileText}
+          title="Sin datos para reportes"
+          sub="No hay información suficiente para generar reportes"
+        />
       ) : activeReport ? (
         // ── Active report ──
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Header */}
           {(() => {
             const rt = REPORT_TYPES.find(r => r.id === activeReport);
+            if (!rt) return null;
+
             const evCount = (reportEvents[activeReport] || []).length;
             return (
               <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 22px", background: `${rt.color}08`, borderRadius: 14, border: `1px solid ${rt.color}20` }}>
@@ -340,25 +378,25 @@ export default function ReportsView() {
 
           {/* Report content */}
           {activeReport === "activity_summary" && (
-            <ActivitySummaryReport events={filteredEvents} dbs={dbs} />
+            <ActivitySummaryReport events={filteredEvents || []} dbs={dbs} />
           )}
           {activeReport === "user_activity" && (
-            <EventTable events={filteredEvents} title="Actividad completa por usuario" />
+            <EventTable events={filteredEvents || []} title="Actividad completa por usuario" />
           )}
           {activeReport === "privilege_changes" && (
-            <EventTable events={reportEvents.privilege_changes} title="GRANT / REVOKE registrados" />
+            <EventTable events={reportEvents.privilege_changes || []} title="GRANT / REVOKE registrados" />
           )}
           {activeReport === "schema_changes" && (
-            <EventTable events={reportEvents.schema_changes} title="Cambios de esquema (DDL)" />
+            <EventTable events={reportEvents.schema_changes || []} title="Cambios de esquema (DDL)" />
           )}
           {activeReport === "sensitive_access" && (
-            <EventTable events={reportEvents.sensitive_access} title="Accesos a datos sensibles (critical + high)" />
+            <EventTable events={reportEvents.sensitive_access || []} title="Accesos a datos sensibles (critical + high)" />
           )}
           {activeReport === "anomaly_report" && (
-            <EventTable events={reportEvents.anomaly_report} title="Anomalías — críticos y errores" />
+            <EventTable events={reportEvents.anomaly_report || []} title="Anomalías — críticos y errores" />
           )}
           {["compliance_gdpr","compliance_sox","compliance_hipaa"].includes(activeReport) && (
-            <EventTable events={reportEvents[activeReport]} title={REPORT_TYPES.find(r => r.id === activeReport)?.label} />
+            <EventTable events={reportEvents[activeReport] || []} title={REPORT_TYPES.find(r => r.id === activeReport)?.label} />
           )}
         </div>
       ) : (

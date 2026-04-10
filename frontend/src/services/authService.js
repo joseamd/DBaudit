@@ -1,19 +1,27 @@
 export const login = async (username, password) => {
-  const res = await fetch("http://localhost:8000/api/auth/login/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
-  });
+  let res;
 
-  const data = await res.json();
-
-  // CLAVE: validar respuesta
-  if (!res.ok) {
-    throw new Error(data.detail || "Error de autenticación");
+  try {
+    res = await fetch("http://localhost:8000/api/auth/login/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+  } catch (err) {
+    // Error de red
+    throw new Error("NETWORK_ERROR");
   }
 
-  // SOLO guardar si es válido
-  localStorage.setItem("auth_token", data.access);
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = {};
+  }
+
+  if (!res.ok) {
+    throw new Error(data.detail || "AUTH_ERROR");
+  }
 
   return data;
 };

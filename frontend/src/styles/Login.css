@@ -109,6 +109,13 @@
   border: 1px solid #fde68a;
 }
 
+/* 🌐 Network (sin conexión / backend caído) */
+.login-form .error.network {
+  color: #1d4ed8;            
+  background-color: #eff6ff; 
+  border: 1px solid #bfdbfe;
+}
+
 /* Ícono dinámico */
 .login-form .error::before {
   font-size: 16px;
@@ -122,6 +129,11 @@
 /* Ícono para warning */
 .login-form .error.warning::before {
   content: "⚠️";
+}
+
+/* Ícono para error */
+.login-form .error.network::before {
+  content: "🌐";
 }
 
 /* Animación suave */

@@ -6,7 +6,7 @@ import {
 
 import { AgentService } from "../services/api";
 import { STATUS_AGENT, relTime, unwrap } from "../constants/constants";
-import { fakeAgents } from "../mocks/mockData";
+// import { fakeAgents } from "../mocks/mockData";
 import { Card, StatCard, SectionHeader, Btn, Input, Spinner, EmptyState } from "../components/ui";
 
 // ─── Install Script Modal ─────────────────────────────────────────────────────
@@ -249,14 +249,19 @@ export default function AgentsView() {
   const [newName, setNewName]     = useState("");
   const [newHost, setNewHost]     = useState("");
   const [saving, setSaving]       = useState(false);
+  const [error, setError]         = useState(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
+
     try {
       const data = await AgentService.getAgents();
-      setAgents(unwrap(data, fakeAgents));
-    } catch {
-      setAgents(fakeAgents);
+      setAgents(Array.isArray(data) ? data : data?.results || []);
+    } catch (e) {
+      console.error("Error agents:", e);
+      setError("No se pudo conectar con el servidor");
+      setAgents([]);
     } finally {
       setLoading(false);
     }
@@ -350,9 +355,21 @@ export default function AgentsView() {
 
       {/* Cards grid */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}><Spinner size={32} /></div>
+        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+          <Spinner size={32} />
+        </div>
+      ) : error ? (
+        <EmptyState
+          icon={WifiOff}
+          title="Error de conexión"
+          sub="No se pudo obtener la información del servidor"
+        />
       ) : agents.length === 0 ? (
-        <EmptyState icon={Radio} title="Sin agentes registrados" sub='Haz clic en "Registrar Agente" para añadir el primero' />
+        <EmptyState
+          icon={Radio}
+          title="Sin agentes registrados"
+          sub='Haz clic en "Registrar Agente" para añadir el primero'
+        />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16 }}>
           {agents.map(agent => (

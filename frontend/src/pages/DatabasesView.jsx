@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Server, Plus, Edit2, Trash2, RefreshCw, X, CheckCircle, XCircle, Eye, EyeOff } from "lucide-react";
+import { Server, Plus, Edit2, Trash2, RefreshCw, X, CheckCircle, XCircle, Eye, EyeOff, WifiOff  } from "lucide-react";
 
 import { DatabaseService, AgentService } from "../services/api";;
 import { ENGINE_COLOR, STATUS_AGENT, relTime, unwrap } from "../constants/constants";
-import { fakeDbs, fakeAgents } from "../mocks/mockData";
+// import { fakeDbs, fakeAgents } from "../mocks/mockData";
 import { Card, StatCard, SectionHeader, Btn, Input, Select, Spinner, EmptyState, EngineTag } from "../components/ui";
 
 // ─── DB Form Modal ────────────────────────────────────────────────────────────
@@ -215,27 +215,38 @@ export default function DatabasesView() {
   const [agents, setAgents]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal]     = useState(null); // null | "new" | db object
+  const [error, setError] = useState(null);
 
   const load = async () => {
-      setLoading(true);
+    setLoading(true);
+    setError(null);
 
-      try {
-          const dbData = await DatabaseService.getDatabases();
-          setDbs(Array.isArray(dbData) ? dbData : dbData?.results || []);
-      } catch (e) {
-          console.error("Error databases:", e);
-          setDbs([]);
-      }
+    let dbError = false;
+    let agError = false;
 
-      try {
-          const agData = await AgentService.getAgents();
-          setAgents(Array.isArray(agData) ? agData : agData?.results || []);
-      } catch (e) {
-          console.error("Error agents:", e);
-          setAgents([]);
-      }
+    try {
+      const dbData = await DatabaseService.getDatabases();
+      setDbs(Array.isArray(dbData) ? dbData : dbData?.results || []);
+    } catch (e) {
+      console.error("Error databases:", e);
+      dbError = true;
+      setDbs([]);
+    }
 
-      setLoading(false);
+    try {
+      const agData = await AgentService.getAgents();
+      setAgents(Array.isArray(agData) ? agData : agData?.results || []);
+    } catch (e) {
+      console.error("Error agents:", e);
+      agError = true;
+      setAgents([]);
+    }
+
+    if (dbError && agError) {
+      setError("No se pudo conectar con el servidor");
+    }
+
+    setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
@@ -294,8 +305,18 @@ export default function DatabasesView() {
       {/* Grid */}
       {loading ? (
         <div style={{ display: "flex", justifyContent: "center", padding: 48 }}><Spinner size={32} /></div>
+      ) : error ? (
+        <EmptyState
+          icon={WifiOff}
+          title="Error de conexión"
+          sub="No se pudo obtener la información del servidor"
+        />
       ) : dbs.length === 0 ? (
-        <EmptyState icon={Server} title="Sin bases de datos" sub='Haz clic en "Agregar BD" para añadir la primera' />
+        <EmptyState 
+          icon={Server} 
+          title="Sin bases de datos" 
+          sub='Haz clic en "Agregar BD" para añadir la primera' 
+          />
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 16 }}>
           {dbs.map(db => {

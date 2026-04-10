@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { AlertTriangle, Bell, CheckCircle, Clock, RefreshCw, X } from "lucide-react";
+import { AlertTriangle, Bell, CheckCircle, Clock, RefreshCw, X, WifiOff } from "lucide-react";
 
 import { AlertService } from "../services/api";;
 import { SEVERITY_COLOR, relTime, unwrap } from "../constants/constants";
-import { fakeAlerts } from "../mocks/mockData";
+// import { fakeAlerts } from "../mocks/mockData";
 import { Card, StatCard, SeverityBadge, SectionHeader, Btn, Spinner, EmptyState } from "../components/ui";
 
 // ─── Alert Card ───────────────────────────────────────────────────────────────
@@ -76,17 +76,22 @@ function AlertCard({ alert, onAcknowledge, onResolve, onFalsePositive }) {
 // ─── Alerts View ──────────────────────────────────────────────────────────────
 
 export default function AlertsView() {
-  const [alerts, setAlerts]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter]   = useState("");
+  const [alerts, setAlerts]     = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [filter, setFilter]     = useState("");
+  const [error, setError]       = useState(null);
 
   const load = async () => {
     setLoading(true);
+    setError(null);
+
     try {
       const data = await AlertService.getAlerts();
-      setAlerts(unwrap(data, fakeAlerts));
-    } catch {
-      setAlerts(fakeAlerts);
+      setAlerts(Array.isArray(data) ? data : data?.results || []);
+    } catch (e) {
+      console.error("Error alerts:", e);
+      setError("No se pudo conectar con el servidor");
+      setAlerts([]);
     } finally {
       setLoading(false);
     }
@@ -170,9 +175,21 @@ export default function AlertsView() {
 
       {/* List */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}><Spinner size={32} /></div>
+        <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+          <Spinner size={32} />
+        </div>
+      ) : error ? (
+        <EmptyState
+          icon={WifiOff}
+          title="Error de conexión"
+          sub="No se pudo obtener la información del servidor"
+        />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={Bell} title="Sin alertas" sub={filter ? `No hay alertas con estado "${filter}"` : "No hay alertas registradas"} />
+        <EmptyState
+          icon={Bell}
+          title="Sin alertas"
+          sub={filter ? `No hay alertas con estado "${filter}"` : "No hay alertas registradas"}
+        />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {filtered.map(alert => (

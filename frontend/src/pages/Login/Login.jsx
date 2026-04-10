@@ -10,6 +10,7 @@ export default function Login() {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
   const [errorType, setErrorType] = useState(""); // tipo de error
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLoaded(true);
@@ -17,7 +18,7 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    
+
     // Validación de campos vacíos
     if (!user.trim() || !pass.trim()) {
       setError("Por favor completa todos los campos");
@@ -27,16 +28,22 @@ export default function Login() {
 
     try {
       const data = await login(user, pass);
-      localStorage.setItem("auth_token", data.access);
 
       if (!data.access) {
         throw new Error("Token inválido");
       }
 
+      localStorage.setItem("auth_token", data.access);
       window.location.href = "/";
+
     } catch (e) {
-      setError("Usuario y/o Contraseña incorrecto (s)");
-      setErrorType("error");
+      if (e.message === "NETWORK_ERROR") {
+        setError("No se pudo conectar con el servidor");
+        setErrorType("network");
+      } else {
+        setError("Usuario o contraseña incorrectos");
+        setErrorType("error");
+      }
     }
   };
 
@@ -64,19 +71,23 @@ export default function Login() {
             <input
               type="text"
               placeholder="Usuario"
+              autoComplete="username"
               value={user}
               onChange={(e) => {
                 setUser(e.target.value);
                 setError(""); // limpia error
+                setErrorType("");
               }}
             />
             <input
               type="password"
               placeholder="Contraseña"
+              autoComplete="current-password"
               value={pass}
               onChange={(e) => {
                 setPass(e.target.value);
                 setError(""); // limpia error
+                setErrorType("");
               }}
             />
             {error && (
@@ -84,7 +95,9 @@ export default function Login() {
                 {error}
               </p>
             )}
-            <button type="submit">Ingresar</button>
+            <button type="submit" disabled={loading}>
+              {loading ? "Ingresando..." : "Ingresar"}
+            </button>
           </form>
         </div>
       </div>

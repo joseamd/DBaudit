@@ -76,50 +76,20 @@ export default function App() {
           overflow: "hidden",
         }}>
           {/* Logo */}
-          <div style={{
-            padding: "22px 8px 20px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-            marginBottom: 14
-          }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}>
-              {/* Icono siempre visible */}
+          <div style={{ padding: "22px 8px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: 14 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
+                width: 36, height: 36, borderRadius: 10,
                 background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: "flex", alignItems: "center", justifyContent: "center",
                 boxShadow: "0 0 20px #4f46e530",
               }}>
                 <Shield size={18} color="#fff" />
               </div>
-
-              {/* Texto solo si no está colapsado */}
-              {!collapsed && (
-                <div>
-                  <div style={{
-                    fontSize: 14,
-                    fontWeight: 800,
-                    color: "#f8fafc",
-                    letterSpacing: "-0.3px"
-                  }}>
-                    DBaudit
-                  </div>
-                  <div style={{
-                    fontSize: 10,
-                    color: "#475569",
-                    fontWeight: 500
-                  }}>
-                    v1.0 · Enterprise
-                  </div>
-                </div>
-              )}
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: "#f8fafc", letterSpacing: "-0.3px" }}>DBaudit</div>
+                <div style={{ fontSize: 10, color: "#475569", fontWeight: 500 }}>v1.0 · Enterprise</div>
+              </div>
             </div>
           </div>
 
@@ -153,44 +123,15 @@ export default function App() {
           </nav>
 
           {/* User chip */}
-          <div style={{
-            marginTop: "auto",
-            paddingTop: 20,
-            borderTop: "1px solid rgba(255,255,255,0.06)"
-          }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "8px 10px",
-            }}>
-              {/* Iniciales */}
-              <div style={{
-                width: 30,
-                height: 30,
-                borderRadius: "50%",
-                background: "linear-gradient(135deg,#4f46e5,#7c3aed)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 12,
-                fontWeight: 700,
-                color: "#fff",
-              }}>
+          <div style={{ marginTop: "auto", paddingTop: 20, borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px" }}>
+              <div style={{ width: 30, height: 30, borderRadius: "50%", background: "linear-gradient(135deg,#4f46e5,#7c3aed)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, color: "#fff" }}>
                 AM
               </div>
-
-              {/* Texto solo si no está colapsado */}
-              {!collapsed && (
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "#e2e8f0" }}>
-                    &copy; 2026 Alex Muñoz
-                  </div>
-                  <div style={{ fontSize: 10, color: "#e2e8f0" }}>
-                    Todos los derechos reservados.
-                  </div>
-                </div>
-              )}
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 600, color: "#e2e8f0" }}>&copy; 2026 Alex Muñoz</div>
+                <div style={{ fontSize: 10, color: "#e2e8f0" }}> Todos los derechos reservados.</div>
+              </div>
             </div>
           </div>
         </aside>

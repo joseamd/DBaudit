@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, Download, RefreshCw, ChevronDown, X, ChevronRight, ChevronLeft } from "lucide-react";
+import { Search, Download, RefreshCw, ChevronDown, X, ChevronRight, ChevronLeft, WifiOff } from "lucide-react";
 
 import { EventService, DatabaseService } from "../services/api";;
 import { OP_COLOR, SEVERITY_COLOR, SEVERITY_BG, fmtDate, unwrap } from "../constants/constants";
-import { fakeEvents, fakeDbs } from "../mocks/mockData";
+// import { fakeEvents, fakeDbs } from "../mocks/mockData";
 import { Card, SeverityBadge, OpBadge, SectionHeader, Btn, Input, Select, Spinner, EmptyState } from "../components/ui";
 
 const PER_PAGE = 20;
@@ -113,25 +113,41 @@ export default function EventsView() {
   const [dbFilter, setDbFilter]   = useState("");
   const [page, setPage]           = useState(0);
   const [selected, setSelected]   = useState(null);  
+  const [error, setError]         = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    try {
-      const [evData, dbData] = await Promise.all([
-        EventService.getEvents({ limit: 500 }),
-        DatabaseService.getDatabases(),
-      ]);
-      // console.log("EVENTS RAW:", evData);   
-      // console.log("DBS RAW:", dbData); 
+    setError(null);
 
-      setEvents(unwrap(evData, fakeEvents));
-      setDbs(unwrap(dbData, fakeDbs));
-    } catch {
-      setEvents(fakeEvents);
-      setDbs(fakeDbs);
-    } finally {
-      setLoading(false);
+    const [evRes, dbRes] = await Promise.allSettled([
+      EventService.getEvents({ limit: 500 }),
+      DatabaseService.getDatabases(),
+    ]);
+
+    // Events
+    if (evRes.status === "fulfilled") {
+      const data = evRes.value;
+      setEvents(Array.isArray(data) ? data : data?.results || []);
+    } else {
+      console.error("Error events:", evRes.reason);
+      setEvents([]);
     }
+
+    // DBs
+    if (dbRes.status === "fulfilled") {
+      const data = dbRes.value;
+      setDbs(Array.isArray(data) ? data : data?.results || []);
+    } else {
+      console.error("Error dbs:", dbRes.reason);
+      setDbs([]);
+    }
+
+    // Solo error si TODO falla
+    if (evRes.status === "rejected" && dbRes.status === "rejected") {
+      setError("No se pudo conectar con el servidor");
+    }
+
+    setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -221,8 +237,18 @@ export default function EventsView() {
       <Card style={{ padding: 0, overflow: "hidden" }}>
         {loading ? (
           <div style={{ display: "flex", justifyContent: "center", padding: 48 }}><Spinner size={32} /></div>
+        ) : error ? (
+          <EmptyState
+            icon={WifiOff}
+            title="Error de conexión"
+            sub="No se pudo obtener la información del servidor"
+          />
         ) : paged.length === 0 ? (
-          <EmptyState icon={Search} title="Sin resultados" sub="Ajusta los filtros para encontrar eventos" />
+          <EmptyState
+            icon={Search}
+            title="Sin resultados"
+            sub="Ajusta los filtros para encontrar eventos"
+          />
         ) : (
           <>
             <div style={{ overflowX: "auto" }}>
